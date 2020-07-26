@@ -1,0 +1,56 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Yet Another Node.js Blogg Application API",
+        "description": "Yet Another Node.js Blogg Application API",
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "host": "",
+    "basePath": "/",
+    "tags": [
+        {
+            "name": "Users",
+            "description": "API for users in the system"
+        }
+    ],
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "text/csv"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/api/fileanalyse": {
+            "post": {
+                "tags": [
+                    "File upload"
+                ],
+                "description": "Download new csv with sorted data",
+                "parameters": [
+                    {
+                        "name": "upfile",
+                        "in": "formData",
+                        "type": "file",
+                        "description": "File which we want to edit",
+                        "required": "true"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ignore this"
+                    }
+                }
+            }
+        }
+    }
+}
