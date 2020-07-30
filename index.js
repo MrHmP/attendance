@@ -32,11 +32,11 @@ app.post('/api/fileanalyse', upload.single("upfile"), (req, res) => {
             console.log(err);
             throw new Error(err);
         }
-        const presentStudents = getNames(fileContent);
+        const parsedAttendance = getNames(fileContent);
+        const presentStudents = parsedAttendance.names;
         CSectionPresentStudents = presentStudents.filter(x => x.endsWith('c'));
         DSectionPresentStudents = presentStudents.filter(x => x.endsWith('d'));
 
-        let attendance = [];
         let ls = "Name,Section,Attendance\n";
 
         allStudents.forEach(student => {
@@ -44,8 +44,8 @@ app.post('/api/fileanalyse', upload.single("upfile"), (req, res) => {
                 ls += student.Name + "," + student.Section + "," + (isStudentPresent(student) ? 'P' : 'A') + "\n";
             }
         });
-
-        res.setHeader('Content-disposition', 'attachment; filename=marked.csv');
+        const header = `attachment; filename=${parsedAttendance.date}.csv`;
+        res.setHeader('Content-disposition', header);
         res.set('Content-Type', 'text/csv');
         res.send(ls);
         fs.unlinkSync(req.file.path);
@@ -63,17 +63,22 @@ function isStudentPresent(student) {
 function getNames(wrongCSV) {
     let lines = wrongCSV.split('\n');
     let names = [];
+    let date = "";
 
     lines.forEach(line => {
         const chunks = line.split('\t') || [""];
         chunks[0] = chunks[0].toString().toLowerCase().replace(/[\u0000\ufffd\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, '').replace(/\s\s+/g, ' ');
         if (chunks.length === 3 && chunks[0] !== "") {
+            date = chunks[2].split(",")[0].toString().toLowerCase().replace(/[\u0000\ufffd\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, '').replace(/\s\s+/g, ' ');
             if (names.indexOf(chunks[0]) === -1) {
                 names.push(chunks[0]);
             }
         }
     });
-    return names;
+    return {
+        names,
+        date
+    };
 }
 
 swaggerDocument.host = `${host}:${port}`;
