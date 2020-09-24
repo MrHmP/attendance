@@ -25,7 +25,7 @@ readFile("source.csv", 'utf-8', (err, fileContent) => {
     // allStudents = allStudents.map(s => s.Name.replace(/\s\s+/g, ' ').toLowerCase())
 });
 
-app.post('/api/11/attendance', upload.single("upfile"), (req, res) => {
+app.post('/api/11/:section/attendance', upload.single("upfile"), (req, res) => {
 
     readFile(req.file.path, 'utf-8', (err, fileContent) => {
         if (err) {
@@ -38,12 +38,16 @@ app.post('/api/11/attendance', upload.single("upfile"), (req, res) => {
         DSectionPresentStudents = presentStudents.filter(x => x.endsWith('d'));
 
         let ls = "Name,Section,Attendance\n";
-
-        allStudents.forEach(student => {
-            if (student.Name !== "") {
-                ls += student.Name + "," + student.Section + "," + (isStudentPresent(student) ? 'P' : 'A') + "\n";
-            }
-        });
+        let attendence = "";
+        allStudents.filter(s => s.Section.toLowerCase() == req.params.section.toLowerCase())
+            .forEach(student => {
+                if (student.Name !== "") {
+                    const atten = (isStudentPresent(student) ? 'P' : 'A');
+                    ls += student.Name + "," + student.Section + "," + atten + "\n";
+                    attendence += atten + "\n";
+                }
+            });
+        pbcopy(attendence);
         const header = `attachment; filename=${parsedAttendance.date}.csv`;
         res.setHeader('Content-disposition', header);
         res.set('Content-Type', 'text/csv');

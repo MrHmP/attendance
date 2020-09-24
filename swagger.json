@@ -27,7 +27,7 @@
         "application/json"
     ],
     "paths": {
-        "/api/11/attendance": {
+        "/api/11/{section}/attendance": {
             "post": {
                 "tags": [
                     "File upload"
@@ -39,6 +39,13 @@
                         "in": "formData",
                         "type": "file",
                         "description": "File which we want to edit",
+                        "required": "true"
+                    },
+                    {
+                        "name": "section",
+                        "in": "path",
+                        "type": "string",
+                        "description": "Section name",
                         "required": "true"
                     }
                 ],
