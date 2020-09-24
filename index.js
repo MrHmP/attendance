@@ -25,7 +25,7 @@ readFile("source.csv", 'utf-8', (err, fileContent) => {
     // allStudents = allStudents.map(s => s.Name.replace(/\s\s+/g, ' ').toLowerCase())
 });
 
-app.post('/api/fileanalyse', upload.single("upfile"), (req, res) => {
+app.post('/api/11/attendance', upload.single("upfile"), (req, res) => {
 
     readFile(req.file.path, 'utf-8', (err, fileContent) => {
         if (err) {
@@ -53,11 +53,48 @@ app.post('/api/fileanalyse', upload.single("upfile"), (req, res) => {
 
 })
 
+app.post('/api/11/marks', upload.single("upfile"), (req, res) => {
+
+    readFile(req.file.path, 'utf-8', (err, fileContent) => {
+        if (err) {
+            console.log(err);
+            throw new Error(err);
+        }
+        const parsedAttendance = getNamesForMarks(fileContent);
+        CSectionPresentStudents = parsedAttendance.filter(x => x.name.toLowerCase().endsWith('c'));
+        DSectionPresentStudents = parsedAttendance.filter(x => x.name.toLowerCase().endsWith('d'));
+
+        let ls = "Name,Section,Marks\n";
+
+        allStudents.forEach(student => {
+            if (student.Name !== "") {
+                ls += student.Name + "," + student.Section + "," + getMarks(student) + "\n";
+            }
+        });
+        const header = `attachment; filename=marks.csv`;
+        res.setHeader('Content-disposition', header);
+        res.set('Content-Type', 'text/csv');
+        res.send(ls);
+        fs.unlinkSync(req.file.path);
+    });
+
+})
+
 function isStudentPresent(student) {
     let nameToSearch = student.Name.replace(/\s\s+/g, ' ').toLowerCase();
     let list = student.Section === 'D' ? DSectionPresentStudents : CSectionPresentStudents;
 
     return list.find(z => z.split(' ')[0] === nameToSearch.split(' ')[0]) != undefined;
+}
+
+function getMarks(student) {
+    let nameToSearch = student.Name.replace(/\s\s+/g, ' ').toLowerCase();
+    let list = student.Section === 'D' ? DSectionPresentStudents : CSectionPresentStudents;
+    const children = list.find(z => z.name.split(' ')[0].toLowerCase() === nameToSearch.split(' ')[0].toLowerCase());
+    if (children != undefined) {
+        return children.marks;
+    }
+    return 0;
 }
 
 function getNames(wrongCSV) {
@@ -79,6 +116,20 @@ function getNames(wrongCSV) {
         names,
         date
     };
+}
+
+function getNamesForMarks(wrongCSV) {
+    let lines = wrongCSV.split('\n');
+    let names = [];
+
+    lines.forEach(line => {
+        const chunks = line.split(',') || [""];
+        for (let z = 0; z < chunks.length; z++) {
+            chunks[z] = chunks[z].toString().toLowerCase().replace(/[\u0000\ufffd\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, '').replace(/\s\s+/g, ' ');
+        }
+        names.push({ "name": chunks[0].toLowerCase().replace(/['"]+/g, '') + " " + (chunks[1] || "").toLowerCase().replace(/['"]+/g, ''), "marks": (chunks[3] || "").toLowerCase().replace(/['"]+/g, '') });
+    });
+    return names;
 }
 
 swaggerDocument.host = `${host}:${port}`;

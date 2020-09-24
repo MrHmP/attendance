@@ -27,12 +27,37 @@
         "application/json"
     ],
     "paths": {
-        "/api/fileanalyse": {
+        "/api/11/attendance": {
             "post": {
                 "tags": [
                     "File upload"
                 ],
                 "description": "Download new csv with sorted data",
+                "parameters": [
+                    {
+                        "name": "upfile",
+                        "in": "formData",
+                        "type": "file",
+                        "description": "File which we want to edit",
+                        "required": "true"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ignore this"
+                    }
+                }
+            }
+        },
+        "/api/11/marks": {
+            "post": {
+                "tags": [
+                    "Marks"
+                ],
+                "description": "Download new csv with sorted marks",
                 "parameters": [
                     {
                         "name": "upfile",
