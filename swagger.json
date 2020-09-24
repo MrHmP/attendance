@@ -52,7 +52,7 @@
                 }
             }
         },
-        "/api/11/marks": {
+        "/api/11/{section}/marks": {
             "post": {
                 "tags": [
                     "Marks"
@@ -64,6 +64,13 @@
                         "in": "formData",
                         "type": "file",
                         "description": "File which we want to edit",
+                        "required": "true"
+                    },
+                    {
+                        "name": "section",
+                        "in": "path",
+                        "type": "string",
+                        "description": "Section name",
                         "required": "true"
                     }
                 ],

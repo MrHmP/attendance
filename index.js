@@ -53,7 +53,7 @@ app.post('/api/11/attendance', upload.single("upfile"), (req, res) => {
 
 })
 
-app.post('/api/11/marks', upload.single("upfile"), (req, res) => {
+app.post('/api/11/:section/marks', upload.single("upfile"), (req, res) => {
 
     readFile(req.file.path, 'utf-8', (err, fileContent) => {
         if (err) {
@@ -66,13 +66,14 @@ app.post('/api/11/marks', upload.single("upfile"), (req, res) => {
 
         let ls = "Name,Section,Marks\n";
         let marks = "";
-        allStudents.forEach(student => {
-            if (student.Name !== "") {
-                const mark = getMarks(student);
-                ls += student.Name + "," + student.Section + "," + mark + "\n";
-                marks += mark + "\n";
-            }
-        });
+        allStudents.filter(s => s.Section.toLowerCase() == req.params.section.toLowerCase())
+            .forEach(student => {
+                if (student.Name !== "") {
+                    const mark = getMarks(student);
+                    ls += student.Name + "," + student.Section + "," + mark + "\n";
+                    marks += mark + "\n";
+                }
+            });
         pbcopy(marks);
         const header = `attachment; filename=marks.csv`;
         res.setHeader('Content-disposition', header);
@@ -142,11 +143,11 @@ let server = app.listen(port, function () {
 });
 
 function pbcopy(data) {
-    try{
+    try {
         var proc = require('child_process').spawn('pbcopy');
         proc.stdin.write(data);
         proc.stdin.end();
-    }catch(e){
+    } catch (e) {
         console.error(`Not able to copy to clipboard : ${e}`);
     }
     console.log(`Copied to clipboard!`);
