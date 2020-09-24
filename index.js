@@ -65,12 +65,15 @@ app.post('/api/11/marks', upload.single("upfile"), (req, res) => {
         DSectionPresentStudents = parsedAttendance.filter(x => x.name.toLowerCase().endsWith('d'));
 
         let ls = "Name,Section,Marks\n";
-
+        let marks = "";
         allStudents.forEach(student => {
             if (student.Name !== "") {
-                ls += student.Name + "," + student.Section + "," + getMarks(student) + "\n";
+                const mark = getMarks(student);
+                ls += student.Name + "," + student.Section + "," + mark + "\n";
+                marks += mark + "\n";
             }
         });
+        pbcopy(marks);
         const header = `attachment; filename=marks.csv`;
         res.setHeader('Content-disposition', header);
         res.set('Content-Type', 'text/csv');
@@ -137,3 +140,14 @@ app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 let server = app.listen(port, function () {
     console.log("App listening at http://%s:%s", host, port)
 });
+
+function pbcopy(data) {
+    try{
+        var proc = require('child_process').spawn('pbcopy');
+        proc.stdin.write(data);
+        proc.stdin.end();
+    }catch(e){
+        console.error(`Not able to copy to clipboard : ${e}`);
+    }
+    console.log(`Copied to clipboard!`);
+}  
