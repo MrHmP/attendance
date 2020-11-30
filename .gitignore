@@ -2,3 +2,5 @@ node_modules/
 tmp/
 .vscode/
 .DS_Store
+*.csv
+package-lock.json
